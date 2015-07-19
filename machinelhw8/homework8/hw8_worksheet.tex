@@ -1,0 +1,200 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usetikzlibrary{arrows, automata}
+
+\newcounter{marks}
+\def\maxmarks#1{\extramark{#1}\addtocounter{marks}{#1}}
+\def\extramark#1{\hfill
+  [\emph{#1 points}]\\
+%  \quad\mbox{\LARGE\begin{tabular}{|c|c|}
+%  \hline\rule{1cm}{0cm} & #1 \\ \hline \end{tabular}}
+}
+\def\dumptotal{%
+\begin{flushright}
+\begin{tabular}{|l|} \hline
+\LARGE{\textbf{\rule{0pt}{16pt}Total:~\themarks}} \\ \hline
+\end{tabular}
+\end{flushright}}
+\def\skiplines#1{\newline \forloop{#1}{{\rule{0pt}{20pt}} \\}}
+
+\specialcomment{answer}{\color{blue}}{\color{black}}
+\def\withanswers{\def\skiplines##1{\relax}\def\skippage{\relax}}
+\def\withoutanswers{\excludecomment{answer}\def\skippage{\clearpage}}
+
+\newif\ifprint
+\printfalse
+
+\oddsidemargin0cm
+\topmargin-2cm     %I recommend adding these three lines to increase the 
+\textwidth16.5cm   %amount of usable space on the page (and save trees)
+\textheight23.5cm  
+
+\newcommand{\mycoursenum}{10-601}
+\newcommand{\myhwnum}{8 Worksheet}
+\newcommand{\myname}{Dawei Wang}
+\newcommand{\myandrew}{daweiwan@andrew.cmu.edu}
+\newcommand{\myfirstta}{Kuo Liu}
+\newcommand{\mysecondta}{Yipei Wang}
+
+\newcommand{\question}[2] {\vspace{.25in} \hrule\vspace{0.5em} \noindent{\bf #1: #2} \vspace{0.5em} \hrule \vspace{.10in}}
+\renewcommand{\part}[1] {\vspace{.10in} {\bf (#1)}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+ 
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{\textbf{HW\myhwnum}}}
+\ifprint
+\rhead{\fancyplain{}{Andrew ID: \rule{0.2\textwidth}{.4pt}}}
+\else
+\rhead{\fancyplain{}{\myname\\ \myandrew}}
+\fi
+\chead{\fancyplain{}{\mycoursenum}}
+
+\withoutanswers
+
+\begin{document}
+
+\medskip
+
+\thispagestyle{plain}
+\begin{center}
+{\Large \mycoursenum: Homework \myhwnum} \\
+Due: 24 November 2014 11:59pm (Autolab) \\
+TAs: \myfirstta, \mysecondta \\
+\medskip
+\ifprint
+Name: \rule{0.5\textwidth}{.4pt} \\
+Andrew ID: \rule{0.45\textwidth}{.4pt} \\
+\else
+Name: \myname \\
+Andrew ID: \myandrew \\
+\fi
+\end{center}
+
+Please answer to the point, and do not spend time/space giving irrelevant details. 
+%You should not require more space than is provided for each question. If you do, please think whether you can make your argument more pithy, an exercise that can often lead to more insight into the problem. 
+Please state any additional assumptions you make while answering the questions. 
+For Questions 1 to 5, 6(b) and 6(c), you need to submit your answers in a single PDF file on autolab, either a scanned handwritten version or a \LaTeX pdf file. 
+Please make sure you write legibly for grading.
+For Question 6(a), submit your m-files on autolab. 
+
+You can work in groups. However, no written notes can be shared, or taken during group discussions. You may ask clarifying questions on Piazza. However, under no circumstances should you reveal any part of the answer publicly on Piazza or any other public website. The intention of this policy is to facilitate learning, not circumvent it. Any incidents of plagiarism will be handled in accordance with \href{http://www.cmu.edu/policies/documents/Academic%20Integrity.htm}{CMU's Policy on Academic Integrity}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{$\star$}{Code of Conduct Declaration}
+
+\begin{itemize}
+	\item Did you receive any help whatsoever from anyone in solving this assignment? No.
+	\item Did you give any help whatsoever to anyone in solving this assignment? No.
+\end{itemize}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{1} {PCA I  (TA:- \myfirstta)}
+\part{a}
+Remember that the key assumption of a naive Bayes (NB) classifier is that features are independent, which is not always desirable. Suppose that linear principle component analysis(PCA) is used to transform the features, and NB is then used to classify data in this low-dimension space. Is it true for the following  statement? Give reasons to explain why it is true or false. The independent assumption of NB  would now be valid with PCA transformed features because all principle components are orthogonal hence independent. 
+\maxmarks{7} 
+
+{\color{blue} FALSE. Principle components being orthogonal means that they're uncorrelated; 
+but the features in the dimension-reduced space could still be dependent. }
+
+\part{b}
+We usually treat SVD and PCA to be synonymous, can SVD and PCA really produce the same projection result? If yes, under what condition they are the same? If no, please explain why. ${}_{}$
+\maxmarks{7}  
+
+{\color{blue} YES. SVD can be employed to complete PCA. Decomposing $\mathbf{X}$ using SVD
+gives $\mathbf{X=U\Gamma V^T}$, and the covariance matrix $\mathbf{C}=n^{-1}
+\mathbf{XX^{-1}}=n^{-1}\mathbf{U\Gamma^2U^T}$, where $\mathbf{U}$ is a $n\times m$ matrix.
+If $n<m$, the first $n$ columns in $\mathbf{U}$ correspond to the sorted eigenvalues of
+$\mathbf{C}$, and if $m\ge n$, the first $m$ columns correspond to the non-zero eigenvalues 
+of $\mathbf{C}$. The projection can thus be written as:
+\begin{equation}
+\mathbf{Y=U^TX=U^TU\Gamma V^T}
+\end{equation}
+
+REFERENCE: {\it Singular Value Decomposition and Principal Component Analysis}, 
+Rasmus Elsborg Madsen, Lars Kai Hansen and Ole Winther, February 2004. }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{2} {PCA II (TA:- \myfirstta)}
+ Given 3 data points in 2-d space, (1,1), (2,2) and (3,3)
+ 
+\part{a}
+What is the first principle component?
+\maxmarks{5}
+
+{\color{blue} The first principle component is $\left(2^{-0.5},2^{-0.5}\right)$.}
+
+\part{b}
+If we want to project the original data points into a 1-d space by principle component you choose, what is the variance of the projected data?
+\maxmarks{5} 
+
+{\color{blue} The project data are $2^{0.5}, 2\cdot2^{0.5},3\cdot2^{0.5}$.
+The variance is $\frac43$. }
+
+\part{c}
+For the projected data in (b), now if we represent them in the original 2-d space, what is the reconstruction error?
+\maxmarks{5}
+
+{\color{blue} The reconstruction error is zero, since the data points perfectly line up. 
+}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{3} {Collaborative Filtering (TA:- \myfirstta)}
+ The problem of collaborative filtering is to predict how well a user will like an item that he has not rated given a set of historical preference judgments for a community of users.\\
+\begin{center}
+    \begin{tabular}{| l | l | l | l | l | l | l | l | l | l | l |}
+    \hline
+    {} & $i_1$ & $i_2$ & $i_3$ & $i_4$ & $i_5$ & $i_6$ & $i_7$ & $i_8$ & $i_9$ & $i_{10}$ \\ \hline
+    $u_1$ & 1 & 2 & 3 & 4 & 5 & 1 & 2 & 3 & 4 & 5 \\ \hline
+    $u_2$ & 5 & 4 & 3 & 2 & 1 & 5 & 4 & 3 & 2 & 1 \\ \hline
+    $u_3$ & 1 & 5 & 1 & 5 & 1 & {} & {} & {} & {} & {} \\ \hline
+    $u_4$ & 1 & {} & {} & 5 & {} & {} & {} & {} & {} & {} \\ \hline
+    $u_5$ & 4 & 2 & {} & {} & {} & {} & {} & {} & {} & {} \\ \hline
+    $u_n$ & {} & {} & 1 & 4 & {} & {} & {} & {} & {} & {} \\
+    \hline
+    \end{tabular}
+\end{center}
+Each row can be viewed as a user profile (a bag of items).\\
+Each column can be viewed as an item profile (a bag of users).\\
+Each cell is the rating (if provided) by a user on an item.\\\\
+\textbf{In reality(exp. online shopping platform Amazon.com), the matrix would have many rows and columns(e.g., millions or billions), and be very sparse}\\
+
+The following questions are based on the user-item table given above. Here we apply memory-based approach to predict the user profile of the new user($u_n$).\\
+Memory-based approach: Find the k-nearest neighbors (kNN) in the training set, and make inference about the query from there. The formula is as follows:\\
+\begin{align*}
+\hat{u_n} = \sum_{u_i \in kNN\left(u_n\right)}w(u_n, u_i)u_i
+\end{align*}
+
+\part{a}
+Suppose we treat empty cells as zero, use $cos(u_n, u_i)$ to represent $w(u_n, u_i)$ and set k as 2 in kNN(don't consider the user himself as one of the nearest neighbors), what is the user profile for $u_n$ predicted by this method?
+\maxmarks{8} 
+
+{\color{blue} The cosine similarities are $\cos(u_n,u_1)=0.43937$, $\cos(u_n,u_2)=0.25437$,
+$\cos(u_n,u_3)=0.69961$, $\cos(u_n,u_4)=0.95130$, $\cos(u_n,u_5)=0$. Therefore the nearest
+two neighbors are $u_3$ and $u_4$, and the user profile for $u_n$ would be 
+$\cos(u_n,u_3)u_3+\cos(u_n,u_4)u_4=1.65,3.50,0.70,8.25,0.70,0,0,0,0,0$. }
+
+\part{b}
+So far, we have treated the empty cells as zero's in similarity comparison (when computing cosine similarity). Is this a problem? And can you think out of a way to deal with this problem?
+\maxmarks{8}
+
+{\color{blue} This is a problem if most of the vectors are sparse. To deal with this problem, 
+neglect the dimensions where no data are available. }
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}

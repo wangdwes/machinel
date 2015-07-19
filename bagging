@@ -1,0 +1,19 @@
+Tester:     weka.experiment.PairedCorrectedTTester
+Analysing:  Percent_correct
+Datasets:   1
+Resultsets: 1
+Confidence: 0.05 (two tailed)
+Sorted by:  -
+Date:       12/1/14 10:09 PM
+
+
+Dataset                   (1) meta.Baggi
+----------------------------------------
+CIFAR-10                  (10)   29.46 |
+----------------------------------------
+(v/ /*)                                |
+
+
+Key:
+(1) meta.Bagging '-P 100 -S 1 -I 10 -W trees.REPTree -- -M 2 -V 0.001 -N 3 -S 1 -L -1' -5178288489778728847
+

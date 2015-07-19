@@ -1,0 +1,87 @@
+
+%
+% Copyright (c) 2014, Dawei Wang
+% All rights reserved.
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+%     * Redistributions of source code must retain the above copyright
+%       notice, this list of conditions and the following disclaimer.
+%     * Redistributions in binary form must reproduce the above copyright
+%       notice, this list of conditions and the following disclaimer in the
+%       documentation and/or other materials provided with the distribution.
+%     * Neither the name of Dawei Wang, nor the names of its
+%       contributors may be used to endorse or promote products derived from
+%       this software without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
+%
+
+% extract the images from the file specified by file, 
+% with proper labels set by parsing the filename. 
+function [labels, instances] = extract(file)
+  fid = fopen(file); instances = labels = [];
+  while !feof(fid)
+    path = fgetl(fid); 
+    instances = [instances; double(imread(path)(:)')];
+    labels = [labels; any(strfind(path, 'sunglasses'))];
+  end
+end
+
+% scale the features as required by the libsvm svmtrain method. 
+function [scaled] = scale(instances, lb, ub)
+  scaled = (instances - repmat(lb, size(instances, 1), 1)) ./ ...
+    repmat(ub - lb, size(instances, 1), 1);
+end
+
+% this is the beginning of this script.
+% include the libsvm interface for matlab/octave. 
+addpath('libsvm-3.20/matlab/');
+
+% train the support vector machine. 
+[train_labels, train_instances] = extract('all_train.list');
+ub = max(train_instances); lb = min(train_instances); 
+scaled_train_instances = scale(train_instances, lb, ub);
+[test1_labels, test1_instances] = extract('all_test1.list');
+scaled_test1_instances = scale(test1_instances, lb, ub);
+[test2_labels, test2_instances] = extract('all_test2.list');
+scaled_test2_instances = scale(test2_instances, lb, ub);
+
+% generate some baseline classification accuracies...
+fprintf('Baseline:\n'); tic;
+model = svmtrain(train_labels, scaled_train_instances, '-q -c 100 -g 0.01');
+predicted1_label = svmpredict(test1_labels, scaled_test1_instances, model);
+predicted2_label = svmpredict(test2_labels, scaled_test2_instances, model); toc;
+
+% now apply principal component analysis to see if the performance gets better...
+% apparently we're supposed to use the same basis vectors... or the scores don't make sense.
+[~, ~, d] = svd(cov(train_instances));
+reduced_train_instances = center(scaled_train_instances) * d;
+reduced_test1_instances = center(scaled_test1_instances) * d;
+reduced_test2_instances = center(scaled_test2_instances) * d;
+
+fprintf('Reduced to 50 features...\n'); tic;
+model_pca50 = svmtrain(train_labels, reduced_train_instances(:, 1: 50), '-q -c 500 -g 0.07');
+predicted1_label_pca50 = svmpredict(test1_labels, reduced_test1_instances(:, 1: 50), model_pca50);
+predicted2_label_pca50 = svmpredict(test2_labels, reduced_test2_instances(:, 1: 50), model_pca50); toc;
+
+fprintf('Reduced to 150 features...\n'); tic;
+model_pca150 = svmtrain(train_labels, reduced_train_instances(:, 1: 150), '-q -c 100 -g 0.16');
+predicted1_label_pca150 = svmpredict(test1_labels, reduced_test1_instances(:, 1: 150), model_pca150);
+predicted2_label_pca150 = svmpredict(test2_labels, reduced_test2_instances(:, 1: 150), model_pca150); toc;
+
+fprintf('Reduced to 200 features...\n'); tic;
+model_pca200 = svmtrain(train_labels, reduced_train_instances(:, 1: 200), '-q -c 100 -g 0.07');
+predicted1_label_pca200 = svmpredict(test1_labels, reduced_test1_instances(:, 1: 200), model_pca200);
+predicted2_label_pca200 = svmpredict(test2_labels, reduced_test2_instances(:, 1: 200), model_pca200); toc;

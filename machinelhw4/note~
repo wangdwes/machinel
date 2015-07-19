@@ -1,0 +1,5 @@
+warning: unrecognized option: Algorithm
+warning: the 'quadprog' function belongs to the optim package from Octave Forge
+which seems to not be installed in your system.
+
+

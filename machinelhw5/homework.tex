@@ -1,0 +1,295 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+
+\newcounter{marks}
+\def\maxmarks#1{\extramark{#1}\addtocounter{marks}{#1}}
+\def\extramark#1{
+  \begin{flushright}
+  [\emph{#1 points}]
+  \end{flushright}
+%  \quad\mbox{\LARGE\begin{tabular}{|c|c|}
+%  \hline\rule{1cm}{0cm} & #1 \\ \hline \end{tabular}}
+}
+\def\dumptotal{%
+\begin{flushright}
+\begin{tabular}{|l|} \hline
+\LARGE{\textbf{\rule{0pt}{16pt}Total:~\themarks}} \\ \hline
+\end{tabular}
+\end{flushright}}
+\def\skiplines#1{\newline \forloop{#1}{{\rule{0pt}{20pt}} \\}}
+
+\specialcomment{answer}{\color{blue}}{\color{black}}
+\def\withanswers{\def\skiplines##1{\relax}\def\skippage{\relax}}
+\def\withoutanswers{\excludecomment{answer}\def\skippage{\clearpage}}
+
+\newif\ifprint
+\printfalse
+
+\oddsidemargin0cm
+\topmargin-2cm     %I recommend adding these three lines to increase the 
+\textwidth16.5cm   %amount of usable space on the page (and save trees)
+\textheight23.5cm  
+
+\newcommand{\mycoursenum}{10-601}
+\newcommand{\myhwnum}{5}
+\newcommand{\myname}{Dawei Wang}
+\newcommand{\myandrew}{daweiwan}
+\newcommand{\myfirstta}{Abhinav Maurya}
+\newcommand{\mysecondta}{Ying Yang}
+
+\newcommand{\question}[2] {\vspace{.25in} \hrule\vspace{0.5em} \noindent{\bf #1: #2} \vspace{0.5em} \hrule \vspace{.10in}}
+\renewcommand{\part}[1] {\vspace{.10in} {\bf (#1)}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+ 
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{\textbf{HW\myhwnum}}}
+\ifprint
+\rhead{\fancyplain{}{Andrew ID: \myandrew}}
+\else
+\rhead{\fancyplain{}{\myname\\ \myandrew}}
+\fi
+\chead{\fancyplain{}{\mycoursenum}}
+
+\withoutanswers
+
+\begin{document}
+
+\medskip
+
+\thispagestyle{plain}
+\begin{center}
+{\Large \mycoursenum: Homework \myhwnum} \\
+Due: 25 October 2014 11:59pm (Autolab) \\
+TAs: \myfirstta, \mysecondta \\
+\medskip
+\ifprint
+Name: \rule{0.5\textwidth}{.4pt} \\
+Andrew ID: \rule{0.45\textwidth}{.4pt} \\
+\else
+Name: \myname \\
+Andrew ID: \myandrew \\
+\fi
+\end{center}
+
+Please answer to the point, and do not spend time/space giving irrelevant details. You should not require more space than is provided for each question. If you do, please think whether you can make your argument more pithy, an exercise that can often lead to more insight into the problem. Please state any additional assumptions you make while answering the questions. You need to submit a single PDF file on autolab. Please make sure you write legibly for grading.
+
+You can work in groups. However, no written notes can be shared, or taken during group discussions. You may ask clarifying questions on Piazza. However, under no circumstances should you reveal any part of the answer publicly on Piazza or any other public website. The intention of this policy is to facilitate learning, not circumvent it. Any incidents of plagiarism will be handled in accordance with \href{http://www.cmu.edu/policies/documents/Academic%20Integrity.htm}{CMU's Policy on Academic Integrity}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{$\star$}{Code of Conduct Declaration}
+
+\begin{itemize}
+	\item Did you receive any help whatsoever from anyone in solving this assignment? {\bf No}.
+	\item If you answered \emph{yes}, give full details: \rule{0.4\textwidth}{.4pt} (e.g. \emph{Jane explained to me what is asked in Question 3.4})
+	\item Did you give any help whatsoever to anyone in solving this assignment? {\bf No}.
+	\item If you answered \emph{yes}, give full details: \rule{0.4\textwidth}{.4pt} (e.g. \emph{I pointed Joe to section 2.3 to help him with Question 2}).
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{1}{True or False. (TA:- \myfirstta)}
+
+State whether true (with a brief reason) or false (with a contradictory example). Credit will be granted only if your reasons/counterexamples are correct.
+
+\part{a} If the VC Dimension of a set of classification hypotheses is $\infty$, then the set of classifiers can achieve 100\% training accuracy on any dataset. \\ \\ 
+$\text{\rlap{$\checkmark$}}\square$ True $\Box$ False \maxmarks{2} 
+
+{\color{blue} True. That is by definition. Though note here only has to be one classifier that can achieve 100\% training accuracy, in compliance with the definition of {\bf shattered},
+where it says {\bf there {\it exists} some consistent hypothesis in $H$}. }
+
+\part{b} There is no actual set of classification hypotheses useful in practical machine learning that has VC Dimension $\infty$. \\ \\  
+$\Box$ True $\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2} 
+
+{\color{blue} False. A 1-Nearest Neighbor (1-NN) would be a counter-example. \\
+Also a support vector machine with Gaussian kernel. }
+
+\part{c} VC Dimension of the set of all decision trees (defined on a given set of real-valued features) has is finite. \\ \\ $\text{\rlap{$\checkmark$}}\square$ True $\Box$ False
+\maxmarks{2}
+
+{\color{blue} False. Since a single feature can be tested for multiple times, no matter how 
+many instances we have we can always build a decision adequately complex to contain all possible
+scenarios. }
+
+\part{d} Since the true risk is bounded by the empirical risk, it is a good idea to minimize the training error as much as possible. \\ \\ $\Box$ True $\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2}
+
+{\color{blue} False. It is a good idea to achieve a lower training error on \emph{more} instances.
+A minimal training error merely moves the center of the confidence interval to zero, 
+but its width could be large, leaving the bounding quite pointless. }
+
+\part{e} PAC learning bounds help you estimate the number of samples needed to reduce the discrepancy between the true risk and empirical risk to an arbitrary constant with high probability. \\ \\ $\text{\rlap{$\checkmark$}}\square$ True $\Box$ False
+\maxmarks{2}
+
+{\color{blue} True. This is basically what it does as defined. }
+
+\part{f} If the VC Dimension of a set of classification hypotheses is K, then no algorithm can have a mistake bound that is strictly less than K. \\ \\ $\Box$ True 
+$\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2}
+
+{\color{blue} True. $K$ is equal or greater than the optimal mistake bound. }
+
+\part{g} SVMs with a gaussian kernel have VC Dimension equal to $n+1$ where $n$ is the number of support vectors. \\ \\ $\Box$ True $\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2}
+
+{\color{blue} False. The VC Dimension is $\infty$. A Gaussian kernel effectively maps
+the feature space to a Hilbert space with infinite dimensions. A linear kernel would 
+instead have VC Dimension $n+1$. }
+
+\part{h} As the degree of the polynomial kernel increases, the VC Dimension of the set of classification hypotheses increases. \\ \\ $\text{\rlap{$\checkmark$}}\square$ True $\Box$ False
+\maxmarks{2}
+
+{\color{blue} True. The dimension of the Hilbert space also increases, 
+so does its VC Dimension}. 
+
+\part{i} VC Dimensions of the sets of classification hypotheses induced by logistic regression and linear SVM (learnt on the same set of features) are different. \\ \\ $\Box$ True 
+$\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2}
+
+{\color{blue} False. Both classifiers are essentially linear,
+therefore having the same VC Dimension. }
+
+\part{j} VC Dimension depends on the dataset we use for shattering. \\ \\
+ $\Box$ True $\text{\rlap{$\checkmark$}}\square$ False
+\maxmarks{2}
+
+{\color{blue} False. VC Dimension is defined over an instance space, and has nothing
+to do with any particular dataset. }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\question{2}{PAC learning for conjunctions of boolean literals. (TA:- \mysecondta)}
+
+Consider a function that takes $n$-bit binary inputs ($ \bm x  = (x_1, x_2, \cdots, x_n)$, $x_i \in \{0,1\}$ ) and output binary responses. 
+This function is a list of conjunctions of boolean literals, and the list can include $x_i$ or $\neg x_i$, or neither of them, but not both of them, for $i  = 1, \cdots, n$.  
+One example of such a function is 
+\begin{align*}
+h(\bm x) =  x_1 \wedge \neg x_2 \wedge x_3. 
+\end{align*}
+We are given data that can be perfectly explained by at least one such function.
+Suppose we are also given an algorithm that learns a function, which has zero training error on finite data samples, 
+how many training examples do we need to guarantee, with probability at least $95\%$, that the true error rate of our learned function is $ <5\%$?  Use $n=10$ in your computation.    \\
+\maxmarks{5} 
+
+{\color{blue}
+For each bit there can be no corresponding boolean literal, or one with or without logical not. 
+So there are three possibilities in total. The size of the hypotheses space is therefore
+$|H|=3^n$. 
+
+The minimal number of training examples is given by 
+\begin{equation}
+	m\ge\frac1{5\%}\left[\ln|H|+\ln\frac1{5\%}\right]
+	=20\left[10\ln3+\ln20\right]=280
+\end{equation}}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{3}{VC-dimensions of binary classifiers. (TA:- \mysecondta)}
+
+Write the VC-dimensions of the following families of binary classifiers. 
+Explain your results with examples that can or can not be shattered. 
+
+\begin{enumerate}
+\item  $f: \mathbb{R} \rightarrow \{0, 1\},  f(x) =  \left\{
+\begin{array}{c}
+1 \text{  if  }  x\in [a,b] \\
+0 \text{ otherwise }\\
+\end{array} \right. $
+where $a$ and $b$ are any real constants, such that $a < b$. 
+
+\item The functions in 1 and the functions that flips the outputs of the functions in 1.
+
+\item $ f: \mathbb{R}^2 \rightarrow \{0, 1\},  f(\bm{x}) =  \left\{ \begin{array}{c} 
+1 \text{  if  }  || \bm{x} ||^2 < c \\
+0 \text{ otherwise }\\
+\end{array} \right. $
+where $ \bm{x} \in \mathbb{R}^2, c > 0 \in \mathbb{R}$
+
+\end{enumerate} 
+\maxmarks{9}
+
+{\color{blue}
+
+\begin{enumerate}
+	\item VC Dimension${} = 2$. For arbitrary training set with two instances, just 
+		pick the minimum neighbor that contains all the points labeled with 1. 
+		Here is an example with 3 instances that can not be shattered.
+		\begin{figure}[h!]
+			\centering
+			\begin{tikzpicture}
+				\draw [->] (0, 0) -- (10, 0);
+				\draw [fill = red] (2, 0) node [anchor = north] {1} circle (0.05);
+				\draw [fill = green] (5, 0) node [anchor = north] {0} circle (0.05);
+				\draw [fill = red] (8, 0) node [anchor = north] {1} circle (0.05);
+			\end{tikzpicture}
+		\end{figure}
+
+	\item VC Dimension${}=3$. The example above apperently shattered, however, for
+		4 instances, here is an example that cannot be shattered:
+		\begin{figure}[h!]
+			\centering
+			\begin{tikzpicture}
+				\draw [->] (0, 0) -- (13, 0);
+				\draw [fill = red] (2, 0) node [anchor = north] {1} circle (0.05);
+				\draw [fill = green] (5, 0) node [anchor = north] {0} circle (0.05);
+				\draw [fill = red] (8, 0) node [anchor = north] {1} circle (0.05);
+				\draw [fill = green] (11, 0) node [anchor = north] {0} circle (0.05);				
+			\end{tikzpicture}
+		\end{figure}		
+		
+	\item VC Dimension${}=1$. We need to show that there's at least one set of size $d$, 
+		that $H$ can shatter. c.f., Page 10, {\tt http://cs229.stanford.edu/notes/cs229-notes4.pdf}
+	
+\end{enumerate}
+
+}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\question{4}{Learning theory of SVMs with quadratic Kernels. (TA:- \mysecondta)}
+Given a family of support vector machines with a quadratic kernel $k( \bm {x_1}, \bm{x_2}) = ( \bm{x_1}^T \bm{x_2})^2$. 
+The inputs $\bm x \in \mathbb{R}^n$, and the output is binary. 
+
+\begin{enumerate}
+\item What is the VC-dimension of this family? \maxmarks{4}
+
+{\color{blue} This is a homogeneous polynomial kernel of degree 2. So the constant terms, 
+and the linear terms would disappear (deriving from the inhomogeneous case in the lecture),
+and the quadratic terms and the pairwise terms would remain, which gives a Hilbert space of
+dimension $n+0.5n(n-1)=0.5n(n+1)$, and the VC-dimension would be $0.5n(n+1)+1$.}
+
+\item
+Now we are given data that can be perfectly classified by one SVM in this family.
+If we are trying to train an SVM in this family, how many training examples do we need to guarantee that the true error rate of the trained SVM is $ <5\%$ with probability at least $95\%$ ? Use $n = 10$ in your computation. \maxmarks{2}
+
+{\color{blue} The number of examples is given by: 
+\begin{equation}
+	m\ge\frac1{5\%}\left[4\log_2\frac2{5\%}+8VC(H)\log_2\frac{13}{5\%}\right]
+	=72307
+\end{equation}
+
+
+}
+
+
+
+\end{enumerate}
+
+\dumptotal
+
+\end{document}
+

@@ -1,0 +1,594 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\title{F14-10601, Machine Learning \\ Midterm Review Sheet}
+\author{Dawei Wang \\ \tt daweiwan@andrew.cmu.edu}
+
+\maketitle
+
+\section{introduction}
+\begin{itemize}
+	\item supervised, unsupervised, active learning, reasoning under uncertainty.
+		\begin{itemize}
+			\item supervised: given a set of features and labels, learn a model, predict;
+			\item unsupervised: discover patterns in data without labels; 
+			\item reasoning: determine a model either from samples or as going along; 
+			\item active: select not only model but also which examples to use. 
+		\end{itemize}
+	\item probability: random variable, domain, kolmogorov's axioms (foundation):
+		\begin{itemize}
+			\item $0\le P(A)\le1$;
+			\item $P(\text{true})=1$, $P(\text{false})$=0;
+			\item $P(A\vee B)=P(A)+P(B)-P(A\wedge B)$.
+		\end{itemize}
+		 priors,
+		conditional probability, joint distributions, chain rule. bayes rule:
+		\begin{equation}
+			P(A|B)=\frac{P(B|A)P(A)}{P(B)}=\frac{P(B|A)P(A)}{\sum_AP(B|A)P(A)}
+		\end{equation}
+		density estimator, and hence the maximum likelihood principle:
+		\begin{equation}
+			\hat P(\text{Dataset}|M)=\hat P(x_1\wedge x_2\wedge\dots\wedge x_n|M)
+			=\prod_{k=1}^n\hat P(x_k|M)
+		\end{equation}
+		the logarithmic maximum likelihood principle:
+		\begin{equation}
+			\log\hat P(\text{Dataset}|M)=\log\prod_{k=1}^n\hat P(x_k|M)
+				=\sum_{k=1}^n\log\hat P(x_k|M)
+		\end{equation}
+		take $\partial$ to find the best estimate for binary and guassian distros.
+		\begin{equation}
+			\arg\max_qq^{n_1}(1-q)^{n_2}\rightarrow q=\frac{n_1}{n_1+n_2}
+		\end{equation}
+		for gaussian, that's the conventional deviation and variance. 
+\end{itemize}
+
+\section{classification}
+\begin{itemize}
+	\item bayes decision rule: determine class label using the bayes rule: 
+		\begin{equation}
+			q_i(x)\equiv P(y=i|x)=\frac{P(x|y=i)P(y=i)}{P(x)}
+		\end{equation}
+		bayes error (risk) with two classes, 
+		\begin{equation}
+			R(x)=\min\{P_1(x)P(y=1),P_0(x)P(y=0)\}
+		\end{equation}
+	\item classifiers: instance based (k nearest neighbors), generative (bayesian networks),
+		 discriminative (decision tree), latter two are major types. 
+	\item k nearest neighbors (knn): choice of $k$ influences the {\it smoothness},
+		but this is determined by the actual distribution, not a pre-defined parameter. :(
+		knn as {\it approximated} bayes decision rule.
+	\item a probabilistic intrepretation: let $V$ to be volume of the $m$ dimensional ball
+		around $z$ containing the $k$ nearest neighbors for $z$, then we have
+		\begin{equation}
+			p(x)V=P=\frac KN,\quad p(x)=\frac{K}{NV},\quad p(x|y=1)=\frac{K_1}{N_1V},
+			\quad p(y=1)=\frac{N_1}{N}
+		\end{equation}
+		and using the bayes rule we get $p(y=1|x)=\frac{K_1}{K}$. 
+\end{itemize}
+
+\section{decision trees}
+\begin{itemize}
+	\item discriminative! nodes: attributes, leaves: labels, edges: assignments. \\
+		split/create subtrees by testing on some attributes. 
+	\item determine the best attribute: {\it entropy}, the definition: 
+		\begin{equation}
+			H(X)=\sum_c-p(X=c)\log_2p(X=c)
+		\end{equation}
+		interpretation: with distribution known, minimum bits required to
+		transmit a value. e.g. $P(X=1)=1\rightarrow H=0$, $P(X=1)=0.5\rightarrow H=1$. \\
+		{\it expected bits per symbol}. -- its motivation and origin...		
+	\item conditional entropy: definition: 
+		\begin{equation}
+			H(X|Y)=\sum_iP(Y=i)H(X|Y=i)
+		\end{equation}
+		choose the attribute that produces the most entropy reduction, 
+		or the most {\it information gain}, as defined by 
+		\begin{equation}
+			IG(X|Y)^*=H(X)-H(X|Y)
+		\end{equation}
+		which is always greater than 0, by Jensen's inequality. 
+	\item to avoid overfitting: tree pruning: 
+		\begin{itemize}
+			\item split data into train and test set, then build a tree using training set;
+			\item for all nodes, remove subtree, assign outcome to be the most common, 
+				check testing error and decide whether to keep change or restore. 
+		\end{itemize}
+	\item for continuous values: threshold, recursively. 
+\end{itemize}
+
+\section{naive-bayes classifier}
+\begin{itemize}
+	\item generative! naive-bayes assumes that the attributes are conditionally independent
+		given the class label, or mathematically, 
+		\begin{equation}
+			P(X|y)=\prod_jp_j(x^j|y)
+		\end{equation}
+		and the full classification rule becomes, 
+		\begin{flalign}
+			\hat y&=\arg\max_vp(y=v|X)=\arg\max_v\frac{p(X|y=v)p(y=v)}{p(X)}
+				\nonumber \\ 	&=\arg\max_v\prod_jp_j(x^j|y=v)p(y=v)
+		\end{flalign}
+		and finally the conditional likelihood, 
+		\begin{equation}
+			L(X_i|y_i=v,\Theta_v)=\prod_jp(x_i^j|y_i=v,\theta_v^j)
+		\end{equation}
+	\item for continuous values: covariance matrix${}\rightarrow{}$diagonal matrix:
+		\begin{equation}
+			P(X|y=v)=\prod_j\frac1{\sqrt{2\pi}{\sigma_v^j}}
+				\exp\left[-\frac{(x^j-\mu_v^j)^2}{2(\sigma_v^j)^2}\right]
+		\end{equation}
+		separate means and variances for each class, the estimate would be:
+		\begin{equation}
+			\mu_v^j=\frac1{k_v}\sum_{X_i:y_i=v}x_i^j,\quad
+			(\sigma_v^j)^2=\sum_{X_i:y_i=v}\left(x_i^j-\mu_v^j\right)^2
+		\end{equation}
+		where $(\cdot)_i$ is the instance index, $(\cdot)^j$ feature index. 
+		$(\cdot)_v$ class label. 
+	\item problems: naive! assumption often violated. also: go through the 
+		article classification example in the homework or face annihilation. 
+\end{itemize}
+
+\section{regression}
+\begin{itemize}
+	\item linear regression with least squares: 
+		\begin{equation}
+			w=\arg\min_w\sum_i(y_i-wx_i)^2\quad\text{where}\quad y=wx+\epsilon
+		\end{equation}
+		$\epsilon$ as noise, $y$ as label, $x_i$ as features, $w$ as weights. taking the derivative
+		\begin{equation}
+			\frac{\partial}{\partial w}\sum_i(y_i-wx_i)^2=0\quad\rightarrow\quad
+			w=\frac{\sum_ix_iy_i}{\sum_i x_i^2}
+		\end{equation}
+		gives the best estimate for $w$. 
+	\item introducing a bias term: $y=w_0+w_1x+\epsilon$, then
+		\begin{equation}
+			w_0=\frac{\sum_i(y_i-w_1x_i)}{n},\quad w_1=\frac{\sum_ix_i(y_i-w_0)}{\sum_ix_i^2}
+		\end{equation}
+	\item multivariate regression + non-linear basis function, with $w$, $\phi$ vectors, 
+		\begin{equation}
+			y=w_0\phi_0(x)+w_1\phi_1(x)+\dots+w_k\phi_k(x)=\sum_{j=0}^nw_j\phi_j(x)=w^T\phi(x)
+		\end{equation}
+		and let's minimize the loss-function, with $w$, $\phi$ vectors, 
+		\begin{flalign}
+			J(w)&=\sum_i\left(y^i-w^T\phi(x^i)\right)^2\\
+			\frac{\partial}{\partial w}J(w)&=2\sum_i(y^i-w^T\phi(x^i))\phi(x^i)^T\Rightarrow0
+		\end{flalign}
+		we get, by pesudo-inverse, with $j$ as feature index, and $i$ instance index:
+		\begin{equation}
+			w=(\Phi^T\Phi)^{-1}\Phi^Ty\quad\text{where}\quad \Phi=\phi_j(x^i)
+		\end{equation}
+	\item probabilistic interpretation: mle instead of least squares. 
+	\item locally weighted models, use weight function $\Omega_x$ and solve
+		\begin{equation}
+			\min_w\sum_i\Omega_x(x^i)(y^i-w^T\phi(x^i))^2
+		\end{equation}
+		where the weights can be determined, e.g., by gaussian function. 
+\end{itemize}
+
+\section{logistic-regression}
+\begin{itemize}\parskip2pt
+	\item \emph{discriminative} vs. \emph{generative}.
+	\item regression for classification: sigmoid function as activation function.
+	\item determine parameters using maximum likelihood estimation. 
+		\begin{equation}
+			L\left(y|X;w\right)=\prod_i\left(\frac{1}{1+\exp{w^TX}}\right)^{1-y_i}
+				\left(\frac{\exp{w^TX}}{1+\exp{w^TX}}\right)^{y_i}
+		\end{equation}
+		\begin{equation}
+			LL\left(y|X;w\right)=\sum_i\left[y_iw^TX_i-\ln\left(1+\exp{w^TX_i}\right)\right]
+		\end{equation}
+		\begin{equation}
+			\frac{\partial}{\partial w^j}LL\left(y|X;w\right)=
+			\sum_iX_i^j\left[y_i-p\left(y^i=1|X_i;w\right)\right]
+		\end{equation}
+		bad news: {\it no close form solution}.
+		good news: {\it concave function}.
+	\item gradient ascent: $z=x(y-g(w;x))$ and its update rule (small $\varepsilon$):
+		\begin{equation}
+			w^j\leftarrow w^j+\varepsilon\sum_iX_i^j\left[y_i-(1-g(X_i;w))\right]
+		\end{equation}
+		until likelihood has no further improvement. 
+	\item regularization: additional constraints over $w^j$, e.g.: gaussian. \\
+		in which case we have a \emph{prior}: $p(y=1,\theta|X)\propto p(y=1|X;\theta)p(\theta)$.
+		\begin{equation}
+			LL'\left(y|X;w\right)=\sum_i\left[y_iw^TX_i-\ln\left(1+\exp{w^TX_i}\right)\right]
+				-\sum_j\frac{(w^j)^2}{2\sigma^2}
+		\end{equation}
+		and the update rule becomes
+		\begin{equation}
+			w^j\leftarrow w^j+\varepsilon\sum_iX_i^j\left[y_i-(1-g(X_i;w))\right]
+				-\varepsilon\frac{w^j}{\sigma^2}
+		\end{equation}
+	\item logistic regression for more than two classes: for $i<k$
+		\begin{equation}
+			p(y=i|X;\theta)=\frac{\exp z_i}{1+\sum_{j=1}^{k-1}\exp{z_j}}
+		\end{equation}
+		and for $i=k$, 
+		\begin{equation}
+			p(y=i|X;\theta)=1-\sum_{i=1}^{k-1}p(y=i|X;\theta)
+				=\frac{1}{1+\sum_{j=1}^{k-1}\exp{z_j}}
+		\end{equation}
+		and the derivative becomes
+		\begin{equation}: 
+			\frac{\partial}{\partial w_m^j}LL\left(y|X;w\right)=
+			\sum_iX_i^j\left[\delta_m(y_i)-p\left(y^i=m|X_i;w\right)\right]
+		\end{equation}
+		\begin{equation}
+			w^j\leftarrow w^j+\varepsilon\sum_iX_i^j
+			\left[\delta_m(y_i)-p\left(y^i=m|X_i;w\right)\right]
+		\end{equation}
+	\item data transformation: linear $\rightarrow$ generalized. 
+\end{itemize}
+
+\section{the perceptron}
+\begin{itemize}
+	\item logistic regression as \emph{soft} linear classifier. 
+		{\tt signum} smoothed to {\tt exp}. 
+	\item stochastic gradient descent (SGD): one random sample $i$ at a time: 
+		\footnote{See also: \tt http://leon.bottou.org/publications/psgz/nimes-1991.ps.gz}
+		\begin{equation}
+			w^j\leftarrow w^j+\varepsilon X_i^j\left[y_i-p(y^i=1|X_i;w)\right]
+		\end{equation}	
+	\item {\it non}-stochastic gradiate descent: taking the average over all samples. 
+		\begin{equation}
+			w^j\leftarrow w^j+\varepsilon\frac1n\sum_iX_i^j\left[y_i-p(y^i=1|X_i;w)\right]
+		\end{equation}
+		trying to make expected value of $y|x^j=\cdot$ equal: data $\leftarrow$ predicted. 
+	\item linear classifiers (boundary linear): naive bayes, logistic regression. \\
+		questions: learning {\it easy}? performance?
+	\item perceptron experiment: 1) A $\rightarrow$ B $x$; 2) $B$ predicts $y$; 3) A reveals $y$. \\
+		= compute $\hat y_i=sign(\vec v_k\cdot\vec x_i)$,
+		if wrong, $\vec v_{k+1}=\vec v_k+y_i\vec x_i$, where $y=\pm1$.
+		\begin{itemize}
+			\item rule 1: examples near the origin: $\forall\vec x_i$, $|\vec x_i|^2\le R^2$; 
+			\item rule 2: examples separatable: $\exists\vec u$, $|u|=1$, s.t., $\forall\vec x_i$, 
+				$(\vec u\cdot\vec x_i)y_i>\gamma$.
+		\end{itemize}
+		and two lemmas: $\forall k$: $\vec v_k\cdot\vec u\ge k\gamma$ (by rule 2);
+			$\forall k$, $|v_k|^2\le kR^2$ (by rule 1). 
+		$\rightarrow$ $k<R^2/\gamma^2$, meaning that the less than $R^2/\gamma^2$ mistakes are made.
+	\item the $\Delta$ trick. add {\it label} features to the original features. 
+	\item the voted perceptron: online to batch learning. when picking at random, 
+		$P(error)=k/m$. where $m=$ number of samples. but keeping $\vec v_k$ could
+		be expensive, so: sum of $\vec v_k$ weighted by $m_k/m$.
+	\item sparse vectors. 	
+\end{itemize}
+
+\section{neural networks}
+\begin{itemize}
+	\item basic unit of a neural net: input: $x^i,w^i\rightarrow y=s(f(w^TX_i))$.
+	\item matrix inversion vs. gradient descent : no iterations, no need to specify
+		parameters, closed form solution; however, not universally applicable.
+	\item assume $f(w^TX_i)=w^TX_i$: back to regression and gradient \emph{descent}: 
+		\begin{equation}
+			\frac{\partial}{\partial w_j}\sum_i^n\left(y_i-w^TX_i\right)^2
+			=-2\sum_i^{n}x_i^j\left(y_i-w^TX_i\right)
+		\end{equation}
+ 	\item otherwise, assume sigmoid function: 
+		\begin{equation}
+			\frac{\partial}{\partial w^j}\sum_i\left(y_i-g(w^TX_i)\right)^2
+			=\sum_i2\left(y_i-g(w^TX_i)\right)g'(w^TX_i)X_i^j
+		\end{equation}
+		where $g'(x)=-g(x)(1-g(x))$, and $g(x)=1/(1+\exp x)$.
+	\item learn parameters of two-layer neural networks: \emph{backpropagation}. \\
+		take partial derivative for each of the weighted parameters: 
+		\begin{equation}
+			err_i=(y_i-g({w^{(:)}}^Tg({w^{(:,j)}}^Tx_i))^2
+		\end{equation}
+		where $w^{(:)}$ is the weight vector for the last layer; $w^{(:,j)}$
+		for the second-last layer, and the inner $g(\cdot)$ produces a vector. for the hidden layer:
+		\begin{equation}
+			\frac{\partial}{\partial w^{k,j}}err_i=2
+			\underbrace{(y_i-g(w^Tg({w^{j}}^Tx_i))(-g'(w^Tg({w^{j}}^Tx_i))(w^j}_
+			{\Delta_i^j\mbox{: the mystically {\it set} term on the slides}}g'({w^j}^Tx_i))x_i^k
+		\end{equation}
+		where $w^j$ is the $j$-th element of $w^{(:)}$. update rule revision is trivial. \\
+		note that for consistency we might sum $err$ over all samples. 
+	\item neural network encoding: an example. 
+	\item historical background: 
+		\begin{itemize}
+			\item 1st-gen (1960): perceptrons, hand-coded features;
+			\item 2nd-gen (1985): error signal + backpropagation. 
+		\end{itemize}
+		back-propagation drawbacks: 1) labeled training data; 2) slow;
+		3) stuck in poor local optima. solution: 1) iteratively learn different layers; 
+		2) weights adjusted to reproduce input. 3) learn features for unlabeled input. 
+\end{itemize}
+
+\section{support vector machine}
+\begin{itemize}
+	\item regression classifiers recalled: possibly many classifiers. \\
+		max margin classifiers: boundary that leads to the largest margin from 
+		points on both sides, aka, support vector machine. 
+ 	\item boundary: $w^Tx+b=0$: $w^Tx+b\ge+1\rightarrow+1$, $w^Tx+b\le-1\rightarrow-1$. \\
+		margin $m$ defined in terms of $w$ and $b$ how? observations: 
+		\begin{itemize}
+			\item $\vec m$ is orthogonal to $\pm1$ planes; 
+			\item for $x^+$ on $+1$ and $x^-$ closest point to $x^+$ on $-1$:
+				$x^+=\lambda w+x^-$
+		\end{itemize}
+		together with $w^Tx^{\pm}+b=\pm1$, $|x^+-x^-|=m$, $\rightarrow$
+			$m=|\lambda w|=2/\sqrt{w^Tw}$, \\
+		now search $w$ that correctly classifies all points and maximize $m$. 
+	\item quadratic programming: $\min_u\left(\frac12u^TRu+d^Tu\right)$, 
+		constraints: $au\le b$ and $eu=f$. where $u,b,f,d$ vector, $R$ diagonal,
+		$a,e$ matrix: usable on svm. 
+	\item non-linearly separable case: errors involved. 
+		if $\min w^Tw$ and $\min err$, hard to solve;
+		if $\min\left(w^Tw+err\right)$, hard to code in qp. 	$\rightarrow$ solution:
+		minimize distance $\varepsilon_i$ between misclassified points and their correct planes:
+		\begin{equation}\min_w\left(\frac12w^Tw+\sum_i^nC\varepsilon_i\right)\end{equation}
+		where $\forall x_i\in \text{Class}_{1,2}$: $w^Tx+b\ge\pm1\mp\varepsilon_i$, $C$ constant,
+			with $\varepsilon_i\ge0$. 
+	\item dual formulation: lagrange multiplier for svm optimization: \\
+		\begin{equation}
+			\min\frac12(w^Tw)\quad\text{subject to}\quad (w^Tx_i+b)y_i\ge1
+		\end{equation}
+		\begin{equation}
+			\min_{w,b}\max_{\alpha}\frac{w^Tw}2-\sum_i\alpha_i\left[\left(
+			w^Tx_i+b\right)y_i-1\right]\quad\text{subject to}\quad\alpha_i\ge0
+		\end{equation}
+		taking the $\partial$-wrt $w$, $\alpha$ and $b$: 
+		$w=\sum_i\alpha_ix_iy_i$, $b=y_i-w^Tx_i$, $\sum_i\alpha_iy_i=0$, then
+		substituting $w$ back in to get the dual formulation:
+		\begin{equation}
+			\max_{\alpha}\left(\sum_i\alpha_i-\frac12\sum_{i,j}\alpha_i\alpha_jy_iy_jx_ix_j^T\right)
+			,\sum_i{\alpha_iy_i=0}\quad\text{subject to}\quad\alpha_i\ge0
+		\end{equation}
+	\item non-separable training set may be separable with additional dimensions. \\
+		but: 1) high computation burden; 2) more parameters. svm solves them 
+		by 1) kernel tricks 2) dual formulation only assigns parameters to samples. 
+	\item quadratic kernels. the features with added dimensions are: 
+		\begin{equation}
+			\Phi(x)=1,\underbrace{\sqrt2x^1,\dots,\sqrt2x^m}_{m}
+			,\underbrace{(x^1)^2,\dots,(x^m)^2}_{m}
+			,\underbrace{	\sqrt2x^1x^2,\dots,\sqrt2x^{m-1}x^m}_{\frac12m(m-1)}
+		\end{equation}
+		but $\forall i,j$, $\Phi(x_i)\cdot\Phi(x_j)^T$ costs $m+m+\frac12m(m-1)=O(m^2)$ operations. 
+		however $(x_i\cdot x_j+1)^2$ produces the same thing with only $m$ operations. 
+		it also works for higher order scenarios. just find the correct kernels. \\
+		{\it comments: kernel is a trick! we're just doing projection to higher-dimension space, 
+			and happen to find that kernel makes it easier to compute dot-product! or, think of 
+			it as refining dot-product!}
+	\item for non-linearly separable case: bound on $\alpha$. 
+\end{itemize}
+
+\section{model and feature selection}
+\begin{itemize}
+	\item model selection: features (linear, logistic, svm); parameters
+		(prior, regularization, decision tree, clustering). 
+	\item {\it greed heuristic} model selection algorithm: 
+		\begin{enumerate}
+			\item start with a empty feature set $F_0$, 
+			\item $\forall X$, run alogrithm on $F_0\cup X$; lowest training error
+				$X_j\rightarrow F_{i+1}$.
+		\end{enumerate}
+		optimal at each stage, but not necessarily global optimal. good for
+		most classifiers so far. but stop when? use an independent data-set. data waste!
+		{\it better}: {\bf leave-one-out} cross validation.
+		{\it faster}: {\bf k-fold} cross validation. 
+	\item regularization: include all features but punish large parameters (logistic), 
+		zero probability outcomes (naive bayes). chi-square test (decision tree). 
+		e.g.: bayesian learning: $\lambda$ selected how? {\bf cross validation!}
+	\item minimum description length (mdl): the information theoretic interpretation
+		of regularization: minimize length of data and length of hypothesis. 
+	\item the confidence interval bounds:
+		\begin{equation}
+			\text{Accuracy}_s(h)\pm Z_n\sqrt{\frac{\text{Accuracy}_s(h)(1-\text{Accuracy}_s(h))}{n}}
+		\end{equation}
+\end{itemize}
+
+\section{computational learning theory}
+\begin{itemize}
+	\item problem setting: instances $X$, hypotheses $H$, target functions $C$, sequence
+		of training instances, noise-free labels $c(x)$: outputs $h=\arg\min_{h\in H}error_{train}(h)$.			
+		$error_{train}(h)$ and $error_{true}(h)$. overfitting. confidence interval bounding. 
+	\item some definitions: 
+		\begin{itemize}
+			\item {\bf consistent}: $\forall(x,c(x))\in D$, $h(x)=c(x)$; 
+			\item {\bf version space}: all $h\in H$ consistent with $D$;
+			\item {\bf $\epsilon$-exhausted}: $\forall h\in \text{VS}_{H,D}, error_{true}<\epsilon$. 
+		\end{itemize}
+		and a theorem: 
+		\begin{itemize}
+			\item $Pr\left(\exists h\in H, \text{s.t.}, error_{train}=0\wedge error_{true}>
+				\epsilon\right)\le|H|e^{-\epsilon m}$
+		\end{itemize}
+		how many training examples? $m\ge\epsilon^{-1}\left(\ln|H|-\ln\delta\right)$; \\
+		if $error_{train}=0$, with at least $1-\delta$: $error_{true}\le m^{-1}\left(\ln|H|-\ln\delta\right)$.
+	\item pac-learnable: learning in polynomial time.
+	\item more definitions: 
+		\begin{itemize}
+			\item {\bf dichotomy}: partition into two disjoint subsets. 
+			\item {\bf shattered}: $S$ shattered by $H$ if $\exists$ consistent $h\in H\rightarrow$ dichotomy. 
+			\item {\bf vc-dimension}: size of largest finite subset of $X$ shattered by $H$. 
+		\end{itemize}
+		to guarantee $\forall h\in H$ perfectly fits training data, need instances
+		\begin{equation}
+			m\ge\frac1{\epsilon}\left(4\log_2\frac2{\epsilon}+8\text{VC}(H)\log_2\frac{13}{\epsilon}\right)
+		\end{equation}
+	\item to show that $VC(H)=d$, we need to 
+		\begin{itemize}
+			\item There exists a $d$-sized subset shatterable with arbitrary labels;
+			\item There is no subset of size $d+1$ the can be shattered. 
+		\end{itemize}
+	\item agnostic learning: when the true classifier $c\not\in H$, we can still bound the true
+		error by training error, and see how close we are to $h^*\in H$ that has a lowest true error, 
+		with a probability at least $1-\delta$.
+		\begin{flalign}
+			error_{true}(h)&\le error_{train}(h)+\sqrt{\frac{\ln(|H|)+\ln(1/\delta)}{2m}} \\
+			error_{true}(h)&\le error_{train}(h)+\sqrt{\frac{VC(|H|)(\ln\frac{2m}{VC(H)}+1)+\ln(4/\delta)}{m}}		
+		\end{flalign}
+	\item mistake bounds, optimal mistake bounds, (c.f.: the find-s example),
+		\begin{equation}
+			VC(C)\le\min_AM_A(C)\le\log_2(|C|)
+		\end{equation}
+		where $M_A(C)$ is the max number of mistakes when learning $C$ using $A$. 
+	\item upper bound of $VC(H)$ as a function of $|H|$. 
+\end{itemize}
+
+\section{clustering}
+\begin{itemize}
+	\item finding internal structure, underlying rules, recurring patterns and topics...
+		unsupervised learning: no provided labels. {\bf distance}.
+	\item type i: hierarchical: (bottom-up) repetitively find closest pairs and merge. \\
+		question: how to compute the distance between clusters?
+		\begin{itemize}
+			\item single link: distance of two closest members, 
+			\item complete link: distance of two farthest members, 
+			\item average link: average distance of pairs. (robust against noise)
+		\end{itemize}
+		summary: 1) no need to specify the number of clusters, 2) structure
+			interpreted subjectively, 3) poor scalibility, 4) local optima 5) intuitive. 
+		using the dendrogram to detect outliers. 
+	\item type ii: partitional: specify number of clusters, and place the instances. 
+		(top-down) graph-based clustering: the steps: 
+		\begin{itemize}
+			\item construct the neighborhood graph,
+			\item assign weights to edges (similarity), 
+			\item partition the nodes using the graph structure. 
+		\end{itemize}
+		how to find the number of clusters? knee/elbow finding!
+	\item cluster validation: 
+		\begin{itemize}	
+			\item internal validation: coherence. average intra/inter-cluster similarity. \\
+				requiring the definition of similarity and distance metric. 
+			\item internal validation: stability. subject to minor perturbation. requiring
+				measurement of clusters distance: label matrices. (subsampling)
+			\item external validation: relation to existent categories. the {\it p-value}: 
+				randomly chosen cluster element  exists in some category $G$. 
+		\end{itemize}
+\end{itemize}
+
+\section{more clustering}
+\begin{itemize}
+	\item distance: minkowski metric, hamming distance, correlation coefficient, 
+	\item k-means algorithm: repeat: 
+		\begin{enumerate}
+			\item decide $k$ and initialize their centers randomly, 
+ 			\item decide memberships by assigning objects to nearest cluster centroid, 
+ 			\item move the cluster centers closer to the objects assigned to them. 
+		\end{enumerate}
+		parallelized easily (map-reduce); sensitive to starting points. 
+	\item mixture models (multi-modal density model): gaussian mixture models
+		where all variables are observable: 
+		\begin{equation}
+			p(x_n|\mu,\Sigma)=\sum_{i=1}^k\pi_iN(x|\mu_i,\Sigma_i)
+		\end{equation}
+		and the likelihood for a bunch of data $D$ would be
+		\begin{flalign}
+			l(\theta;D)&=\log\prod_np(z_n,x_n)=\log\prod_np(z_n|\pi)p(x_n|z_n;\mu,\sigma)\nonumber \\
+				&=\sum_n\log\prod_k\pi_k^{z_n^k}+\sum_n\log\prod_kN(x_n;\mu_k,\sigma_k)^{z_n^k} 
+				\nonumber \\
+				&=\sum_n\sum_kz_n^k\log\pi_k-\sum_n\sum_kz_n^k\frac1{2\sigma_k^2}(x_n-\mu_k)^2					\end{flalign}
+		which gives the parameter estimates as follows: 
+		\begin{equation}
+			\hat\pi=\sum_i z_i^k/|D|;\quad\hat\mu=\frac{\sum_nz_n^kx_n}{\sum_n z_n^k};\quad
+			\hat\sigma=?
+		\end{equation}
+	\item exceptation-maximization (em) algorithm: we're not going through this...
+		but know that K-means is a hard version of em. 
+\end{itemize}
+
+\section{bias-variance}
+\begin{itemize}
+	\item as a way to understand overfitting and underfitting: decomposition. \\
+		{\it setting}: true function $f$, noise $\varepsilon$, $h_D(\cdot)$
+		hypothesis learned from $D$, error: 
+		\begin{equation}
+			\text{error}=E_{D,\varepsilon}\left\{\left(f(x)+\varepsilon-h_D(x)\right)^2\right\}
+		\end{equation}
+		more notations: $f\equiv f(x)+\varepsilon$, $\hat y=\hat y_D\equiv h_D(x)$, 
+		and fact: $h\equiv E_D\left\{h_D(x)\right\}$.
+		\begin{equation}
+			\text{error}=E_{D,\varepsilon}\left\{\left(f-\hat y\right)^2\right\}
+			=E_{D,\varepsilon}\left[\left(f-h\right)^2\right]+
+			E_{D,\varepsilon}\left[\left(h-\hat y\right)^2\right]
+		\end{equation}
+		where the first term is ${\tt BIAS}^2$ ({\it you tried so hard but still couldn't 
+			get to the original $f$}), second ${\tt VARIANCE}$ ({\it your each individual attempt
+			may deviate from your best performance. }) 
+	\item tradeoffs: {\it large bias, small variance}: few features, highly regularized, \\
+		highly pruned decision trees, large k-NN. {\it large variance, small bias}: many 
+		features, less regularization, unpruned trees, small k-NN. 
+	\item generalization: (which is not confusing at all): 
+		\begin{itemize}
+			\item optimal prediction: $y^*=\arg\min_{y'}L(t,y')$;
+			\item main prediction of {\bf learner}:
+				$y_m=y_{m,D}=\arg\min_{y'}E_D\left\{L(y,y')\right\}$;
+			\item bias of {\bf learner}: ${\tt BIAS} = L(y^*,y_m)$;
+			\item variance of {\bf learner}: ${\tt VARIANCE}=E_D\left[L(y_m,y)\right]$;
+			\item noise: ${\tt NOISE}=E_t\left[L(t,y^*)\right]$
+		\end{itemize}
+		bias: more expressive (complex)! variance: less expressive (complex)!
+	\item how to approximate $E_D\left\{h_D(x)\right\}$? background: {\it bootstrap} sampling: \\
+		{\bf input}: dataset $D$, {\bf output}: variants: $D_1$, $D_2$, \dots, $D_T$. \\
+		{\bf algorithm}: for each $D_{(\cdot)}$, pick $|D|$ instances uniformly from $D$. \\
+		then, train on $D_{(\cdot)}$ and test on remaining data to get $h_1(x),h_2(x)$,... \\
+		variance = ordinary variance of $h_{(\cdot)}(x)$, bias = $\bar h_{(\cdot)}(x)-y$.
+	\item bagging: bootstrap aggregation. {\bf input}: dataset $D$, and YFCL (wtf); \\
+		{\bf output}: a classifier $h_\text{D,BAG}$. {\bf algorithm}: get $D_{(\cdot)}$ 
+		and train YFCL on it to get $h_{(\cdot)}$, then to classify do majority vote with 		
+		$h_{(\cdot)}$. generally bagged decision trees outperform linear classifiers 
+		if the data is large and clean.
+	\item more details on the confusing generalization: for $(x^*,y^*)$ a single instance.
+		\begin{itemize}
+			\item noisy channel: $y_i=\text{noise}(f(x_i))$, may change $y\rightarrow y'$;
+			\item learned hypothesis: $h=h_D$ from some dataset $D$;
+			\item main prediction of {\bf learner}: 
+				$y_m(x^*)=\arg\min_{y'}E_{D,P}\left\{L(h(x^*),y')\right\}$;
+			\item bias of {\bf learner}: $B(x^*)=L(y_m(x^*),f(x^*))$;
+			\item variance of {\bf learner}: $V(x^*)=E_{D,P}\left\{L(h_D(x^*),y_m(x^*))\right\}$
+			\item noise: $N(x^*)=L(y^*,f(x^*))$.
+		\end{itemize}
+		and yes, we can do case analysis. but no.
+\end{itemize}
+
+\section{boosting}
+\begin{itemize}
+	\item make weaker classifiers better: lemma ideas: 
+		\begin{itemize}
+			\item simple: models $\rightarrow$ one with lowest training error, but what if many?
+			\item stacked learners: train new classifier on predicted and true labels.
+		\end{itemize}
+	\item ensemble methods: divide and conquer. a final classifier${}={}$ a linear 
+		combination of votes of different classifiers weighted by their strength. \\
+		{\it weighted data}: $i$-th training example counts as $D(i)$ examples.
+	\item adaboost: given $(x_i,y_i)$ where $x_i\in X$, $y_i\in Y=\{-1,+1\}$, $i=1,2,\dots,m$.
+		initialize $D_1(i)=m^{-1}$, and iterator over $t\in\{1,2,\dots,T\}$: 
+		\begin{enumerate}
+			\item train weak learner using distribution $D_t$ and get $h_t:X\rightarrow\mathbb{R}$;
+			\item choose $\alpha_t\in\mathbb{R}$, and update 
+			\begin{equation}
+				D_{t+1}(i)=\frac{D_t(i)\exp(-\alpha_ty_ih_t(x_i))}
+					{Z_t=\sum_{i=1}^mD_t(i)\exp(-\alpha_ty_ih_t(x_i))}
+			\end{equation}
+		\end{enumerate}
+		and output the final classifier: 
+		\begin{equation}
+			H(x)=\text{sign}f(x)=\text{sign}\left(\sum_{t=1}^T\alpha_th_t(x)\right)
+		\end{equation}
+	\item problem: how to choose $\alpha_t$? final training error is bounded by: 
+		\begin{equation}
+			\frac1m\sum_{i=1}^m\delta(H(x_i)\ne y_i)\le\frac1m
+				\sum_{i=1}^m\exp(-y_if(x_i))=\prod_tZ_t
+		\end{equation}
+		so minimizing $Z_t$ minimizes the training error. we define that 
+		\begin{equation}
+			\epsilon_t=\sum_{i=1}^mD_t(i)\delta(h_t(x_i)\ne y_i)\quad\text{s.t.,}
+			\quad Z_t=(1-\epsilon_t)e^{-\alpha_t}+\epsilon_te^{\alpha_t}
+		\end{equation}
+		hence take $\partial Z_t/\partial\alpha_t$ tells you that 
+			$\alpha_t=\frac12\ln\frac{1-\epsilon_t}{\epsilon_t}$, bang!
+	\item if each classifier is better than random, this gives you zero training error
+		exponentially fast. also: robust to overfitting, testing error decreases after.
+\end{itemize}
+
+
+	
+\end{document}
